@@ -1,5 +1,6 @@
 # discord-timetable
-A discord bot which displays your untis-timetable
+A discord bot which displays your untis-timetable  
+Bot available later
 
 # Usage
 /stundenplan: shows your timetible  
