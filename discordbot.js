@@ -2,7 +2,7 @@ const WebUntis = require('webuntis');
 
 const pg = require('pg').Client;
 
-const discordToken = "###"
+const discordToken = "#"
 const pgcred = "###"
 
 
@@ -25,17 +25,19 @@ client.on('interactionCreate', async interaction => {
   //buttons
   if (interaction.isButton()) {
     if (interaction.customId.toString().includes("dayplus")) {
-
+      interaction.deferUpdate();
       var tempdate = new Date(interaction.customId.split('-')[1])
       var kid = interaction.customId.substr(0, interaction.customId.indexOf('+'));
       tempdate.setDate(tempdate.getDate() + 1);
-      getStundenplan(interaction, tempdate, true, kid);
+      getStundenplan(interaction, tempdate, kid);
 
     } else if (interaction.customId.toString().includes("dayminus")) {
+      interaction.deferUpdate();
+
       var tempdate = new Date(interaction.customId.split('-')[1])
       tempdate.setDate(tempdate.getDate() - 1);
       var kid = interaction.customId.substr(0, interaction.customId.indexOf('+'));
-      getStundenplan(interaction, tempdate, true, kid);
+      getStundenplan(interaction, tempdate, kid);
     }
 
     return
@@ -43,15 +45,17 @@ client.on('interactionCreate', async interaction => {
 
   //slash commands
   if (interaction.commandName === 'stundenplan' && interaction.isCommand()) {
+    interaction.deferReply();
     var curdate = new Date()
     var prefUser = interaction.options.getUser("nutzer")
     if (prefUser == null) {
       prefUser = interaction.user.id
     }
 
-    getStundenplan(interaction, curdate, false, prefUser);
+    getStundenplan(interaction, curdate, prefUser);
   }
   if (interaction.commandName === 'einstellen' && interaction.isCommand()) {
+    interaction.deferReply();   
     const schoolname = interaction.options.getString('schulname');
     const uname = interaction.options.getString('untis-nutzername');
     const userver = interaction.options.getString('untis-server');
@@ -76,21 +80,22 @@ client.on('interactionCreate', async interaction => {
       .setTimestamp()
       .setFooter('von phil');
 
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [responseEinstellen],
       ephemeral: true
     });
   }
 
   if (interaction.commandName === 'hilfe' && interaction.isCommand()) {
-    var responseHilfe = new MessageEmbed()
+    interaction.deferReply();
+        var responseHilfe = new MessageEmbed()
       .setColor('#ff6033')
       .setTitle("Der Unoffizielle Discord-Untis-Bot")
       .setDescription("**Was kann der Bot?**\n▫️ **/stundenplan** zeigt deinen Stundenplan an.\n▫️ **/einstellen** lässt dich mit deinen Untis-Daten anmelden. (Anmeldedaten werden verschlüsselt gespeichert)\n▫️ **/hilfe** zeigt dieses Fenster.\n\nDu brauchst Support?\nJoine meinen [Discord](https://discord.gg/DUuCMgXDJC)")
       .setTimestamp()
       .setFooter('von phil#0346');
 
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [responseHilfe]
     });
   }
@@ -102,7 +107,7 @@ client.on('ready', () => {
   client.user.setActivity("/hilfe");
 });
 
-async function getStundenplan(interaction, curdate, isbuttonclick, hourid) {
+async function getStundenplan(interaction, curdate, hourid) {
 
   try {
 
@@ -224,17 +229,10 @@ async function getStundenplan(interaction, curdate, isbuttonclick, hourid) {
                   .setStyle('PRIMARY'),
                 );
 
-              if (isbuttonclick) {
-                interaction.update({
+                interaction.editReply({
                   embeds: [stundenplanEmbed],
                   components: [row]
                 })
-              } else {
-                interaction.reply({
-                  embeds: [stundenplanEmbed],
-                  components: [row]
-                })
-              }
               untis.logout();
 
             }
@@ -251,15 +249,9 @@ async function getStundenplan(interaction, curdate, isbuttonclick, hourid) {
       .setTimestamp()
       .setFooter('von phil');
 
-    if (isbuttonclick) {
-      interaction.update({
+      interaction.editReply({
         embeds: [errEmbed]
       })
-    } else {
-      interaction.reply({
-        embeds: [errEmbed]
-      })
-    }
   }
 
 }

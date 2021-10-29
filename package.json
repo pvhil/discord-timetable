@@ -1,0 +1,16 @@
+{
+  "name": "untis",
+  "version": "1.0.0",
+  "description": "shows your untis stundenplan in discord with a onetime login",
+  "main": "discordbot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "phil#0346",
+  "license": "ISC",
+  "dependencies": {
+    "pg": "^8.7.1",
+    "webuntis": "^1.15.4",
+    "discord.js": "^13.2.0"
+  }
+}
