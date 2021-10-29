@@ -1,6 +1,7 @@
 # discord-timetable
 A discord bot which displays your untis-timetable  
-Bot available later
+Bot available later  
+used package : [WebUntis](https://github.com/SchoolUtils/WebUntis)
 
 # Usage
 /stundenplan: shows your timetible  
