@@ -2,8 +2,6 @@ const WebUntis = require('webuntis');
 
 const pg = require('pg').Client;
 
-const axios = require('axios');
-
 const discordToken = "###"
 const pgcred = "###"
 
@@ -29,14 +27,14 @@ client.on('interactionCreate', async interaction => {
     if (interaction.customId.toString().includes("dayplus")) {
 
       var tempdate = new Date(interaction.customId.split('-')[1])
-      var kid = interaction.customId.substr(0, interaction.customId.indexOf('+')); 
+      var kid = interaction.customId.substr(0, interaction.customId.indexOf('+'));
       tempdate.setDate(tempdate.getDate() + 1);
       getStundenplan(interaction, tempdate, true, kid);
 
     } else if (interaction.customId.toString().includes("dayminus")) {
       var tempdate = new Date(interaction.customId.split('-')[1])
       tempdate.setDate(tempdate.getDate() - 1);
-      var kid = interaction.customId.substr(0, interaction.customId.indexOf('+')); 
+      var kid = interaction.customId.substr(0, interaction.customId.indexOf('+'));
       getStundenplan(interaction, tempdate, true, kid);
     }
 
@@ -47,7 +45,7 @@ client.on('interactionCreate', async interaction => {
   if (interaction.commandName === 'stundenplan' && interaction.isCommand()) {
     var curdate = new Date()
     var prefUser = interaction.options.getUser("nutzer")
-    if(prefUser == null){
+    if (prefUser == null) {
       prefUser = interaction.user.id
     }
 
@@ -99,44 +97,10 @@ client.on('interactionCreate', async interaction => {
 
 });
 
-
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
   client.user.setActivity("/hilfe");
 });
-
-async function getNews(date) {
-  try {
-    //news dependency not working will make a pull request someday
-    var messages = [];
-    await axios.get("https://tipo.webuntis.com/WebUntis/api/public/news/newsWidgetData?date=" + date, {
-        headers: {
-          'Cookie': '###'
-        }
-      })
-      .then(function (response) {
-        for (var i = 0; i < response.data.data.messagesOfDay.length; i++) {
-          messages.push(response.data.data.messagesOfDay[i].text.toString().replace(/<\/?[^>]+(>|$)/g, "") + "\n")
-        }
-      })
-      .catch(function (error) {
-        console.log(error);
-      })
-    return messages;
-  } catch (err) {
-    return []
-  }
-}
-
-async function planQuery(q, client) {
-  let res
-  try {
-    await client.query(q)
-  } catch (e) {
-    console.log("error")
-  }
-  return res
-}
 
 async function getStundenplan(interaction, curdate, isbuttonclick, hourid) {
 
@@ -216,7 +180,7 @@ async function getStundenplan(interaction, curdate, isbuttonclick, hourid) {
 
 
 
-            table.push(emote + textextra + " **" + start + " - " + end + "**: " + timetable[i].sg +" in "+timetable[i].ro[0].name+ textextra + "\n")
+            table.push(emote + textextra + " **" + start + " - " + end + "**: " + timetable[i].sg + " in " + timetable[i].ro[0].name + textextra + "\n")
           }
 
           var uname = interaction.user.username
@@ -235,24 +199,27 @@ async function getStundenplan(interaction, curdate, isbuttonclick, hourid) {
             .setTimestamp()
             .setFooter('von phil');
 
-          getNews(untis.convertDateToUntis(curdate)).then(messages => {
+          untis.getNewsWidget(curdate).then(messages => {
+              tempmes = []
+              for (var i = 0; i < messages.messagesOfDay.length; i++) {
+                tempmes.push(messages.messagesOfDay[i].text.toString().replace(/<\/?[^>]+(>|$)/g, "") + "\n")
+              }
 
-              mesString = messages.join("").toString().replaceAll("\n", "\n\n")
-              if (Array.isArray(messages) && messages.length) {
+              mesString = tempmes.join("").toString().replaceAll("\n", "\n\n")
+              if (Array.isArray(tempmes) && tempmes.length) {
                 stundenplanEmbed.addField(name = "**Nachrichten:**", value = mesString, inline = false);
               }
 
               var buttonDate = (curdate.getMonth() + 1) + "." + curdate.getDate() + "." + curdate.getFullYear()
 
-
               const row = new MessageActionRow()
                 .addComponents(
                   new MessageButton()
-                  .setCustomId(hourid+'+dayminus-' + buttonDate)
+                  .setCustomId(hourid + '+dayminus-' + buttonDate)
                   .setEmoji('⬅️')
                   .setStyle('PRIMARY'),
                   new MessageButton()
-                  .setCustomId(hourid+'+dayplus-' + buttonDate)
+                  .setCustomId(hourid + '+dayplus-' + buttonDate)
                   .setEmoji('➡️')
                   .setStyle('PRIMARY'),
                 );
